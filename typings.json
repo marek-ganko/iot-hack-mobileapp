@@ -3,6 +3,7 @@
   "devDependencies": {},
   "ambientDependencies": {
     "es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#4de74cb527395c13ba20b438c3a7a419ad931f1c",
+    "google.maps": "registry:dt/google.maps#3.20.0+20160402004335",
     "google.visualization": "registry:dt/google.visualization#0.0.0+20160317120654"
   }
 }
