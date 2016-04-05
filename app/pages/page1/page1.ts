@@ -1,12 +1,14 @@
 import {Page} from 'ionic-angular';
 import {ElementRef} from 'angular2/core';
 import {Geolocation} from "ionic-native/dist/index";
+import {Observable} from "rxjs/Observable";
 
 @Page({
   templateUrl: 'build/pages/page1/page1.html',
 })
 export class Page1 {
   private elementRef:ElementRef;
+  private watchPositionSubscription:any;
 
   constructor(elementRef:ElementRef) {
     this.elementRef = elementRef;
@@ -14,10 +16,17 @@ export class Page1 {
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
-    });
 
+      this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
+        map.setCenter(this.getLatLng(position));
+      });
+
+    });
   }
 
+  NgOnDestroy() {
+    this.watchPositionSubscription.unsubscribe();
+  }
 
   private loadHeatmapLayer(map) {
     this.getPoints().then(points => {
@@ -55,13 +64,16 @@ export class Page1 {
     });
   }
 
+  private getLatLng(position):any {
+    return new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  }
+
   private loadMap():Promise<any> {
     return new Promise((resolve => {
       this.getCurrentPosition().then(position => {
         console.log(position)
-        const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         const mapOptions = {
-          center: latLng,
+          center: this.getLatLng(position),
           zoom: 15,
           mapTypeId: google.maps.MapTypeId.HYBRID
         };
