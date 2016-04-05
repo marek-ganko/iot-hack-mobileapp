@@ -3,6 +3,12 @@ import {App, Platform} from 'ionic-angular';
 import {StatusBar} from 'ionic-native';
 import {TabsPage} from './pages/tabs/tabs';
 
+//import {MeteorApp} from 'ionic2-meteor/dist/meteor_app';
+var x = require('ionic2-meteor');
+//import {MeteorApp} from 'ionic2-meteor';
+//console.log(MeteorApp);
+
+import 'ionic2-meteor';
 
 @App({
   template: '<ion-nav [root]="rootPage"></ion-nav>',
