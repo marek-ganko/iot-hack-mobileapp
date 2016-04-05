@@ -8,22 +8,32 @@ import {Geolocation} from "ionic-native/dist/index";
 })
 export class Page1 {
 
-  private map: any;
-  private heatmap: any;
 
   constructor() {
     this.loadMap().then(map => {
-      this.map = map;
-      this.getPoints().then(points => {
-        this.heatmap = new google.maps.visualization.HeatmapLayer({
-          data: points,
-          map: map,
-          options: {
-            radius: 20
-          }
-        });
+
+      this.loadBicycleLayer(map);
+
+      this.loadHeatmapLayer(map);
+
+    });
+  }
+
+  private loadHeatmapLayer(map) {
+    this.getPoints().then(points => {
+      new google.maps.visualization.HeatmapLayer({
+        data: points,
+        map: map,
+        options: {
+          radius: 20
+        }
       });
     });
+  };
+
+  private loadBicycleLayer(map) {
+    var bikeLayer = new google.maps.BicyclingLayer();
+    bikeLayer.setMap(map);
   }
 
   private getCurrentPosition():Promise<any> {
