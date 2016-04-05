@@ -10,7 +10,7 @@ var gulp = require('gulp'),
  * tasks before or after the command.
  */
 gulp.task('serve:before', ['watch']);
-gulp.task('emulate:before', ['build']);
+gulp.task('emulate:before', ['build:before']);
 gulp.task('deploy:before', ['build']);
 gulp.task('build:before', ['build']);
 gulp.task('upload:before', ['build']);
@@ -39,11 +39,17 @@ gulp.task('watch', ['sass', 'html', 'fonts', 'scripts'], function(){
   return buildBrowserify({ watch: true });
 });
 
-gulp.task('build', ['sass', 'html', 'fonts', 'scripts'], buildBrowserify);
-gulp.task('sass', ['clean'], buildSass);
-gulp.task('html', ['clean'], copyHTML);
-gulp.task('fonts', ['clean'], copyFonts);
-gulp.task('scripts', ['clean'], copyScripts);
+gulp.task('build', ['cleanAndBuild'], buildBrowserify);
+gulp.task('sass', buildSass);
+gulp.task('html', copyHTML);
+gulp.task('fonts', copyFonts);
+gulp.task('scripts', copyScripts);
+gulp.task('cleanAndBuild', ['clean'], function(){
+  gulp.start('sass');
+  gulp.start('html');
+  gulp.start('fonts');
+  gulp.start('scripts');
+});
 gulp.task('clean', function(){
   return del('www/build');
 });
