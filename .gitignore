@@ -10,4 +10,5 @@ plugins/
 .DS_Store
 Thumbs.db
 www.zip
-.idea/
+.idea
+typings/**/*.d.ts
