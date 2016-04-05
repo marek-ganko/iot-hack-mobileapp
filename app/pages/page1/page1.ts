@@ -1,6 +1,5 @@
 import {Page} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
-import {Observable} from "rxjs/Observable";
 
 @Page({
   templateUrl: 'build/pages/page1/page1.html',
@@ -8,18 +7,19 @@ import {Observable} from "rxjs/Observable";
 export class Page1 {
   private heatmapLayer:any;
   private watchPositionSubscription:any;
-  
-  constructor() {
-      this.loadMap().then(map => {
-        this.loadBicycleLayer(map);
-        this.loadHeatmapLayer(map);
-        this.setListeners(map);
-        this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
-          map.setCenter(this.getLatLng(position));
-        });
-      });
 
-    }
+  constructor() {
+    this.loadMap().then(map => {
+      this.loadBicycleLayer(map);
+      this.loadHeatmapLayer(map);
+      this.setListeners(map);
+      this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
+        map.setCenter(this.getLatLng(position));
+      });
+    });
+
+  }
+
   private setListeners(map) {
     map.addListener('zoom_changed', (zoom) => {
       if (!this.heatmapLayer) {
@@ -43,26 +43,26 @@ export class Page1 {
   };
 
   private loadBicycleLayer(map) {
-      var bikeLayer = new google.maps.BicyclingLayer();
-      bikeLayer.setMap(map);
-    }
+    var bikeLayer = new google.maps.BicyclingLayer();
+    bikeLayer.setMap(map);
+  }
 
   private getCurrentPosition():Promise<any> {
     return Geolocation.getCurrentPosition({timeout: 1000, enableHighAccuracy: true}).then(position=>position, ()=> {
-        console.error('getCurrentPosition error');
-        return {
-          timestamp: new Date().getTime(),
-          coords: {
-            latitude: 51.126603100000004,
-            longitude: 16.9779427,
-            altitude: 0,
-            accuracy: 63,
-            altitudeAccuracy: 0,
-            heading: NaN,
-            speed: NaN
-          }
-        };
-      });
+      console.error('getCurrentPosition error');
+      return {
+        timestamp: new Date().getTime(),
+        coords: {
+          latitude: 51.126603100000004,
+          longitude: 16.9779427,
+          altitude: 0,
+          accuracy: 63,
+          altitudeAccuracy: 0,
+          heading: NaN,
+          speed: NaN
+        }
+      };
+    });
   }
 
   private loadMap():Promise<any> {
@@ -78,33 +78,34 @@ export class Page1 {
       });
     }));
   }
-  
+
   private getLatLng(position):any {
     return new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
   }
 
   private getPoints() {
-      return this.getCurrentPosition().then(position => {
+    return this.getCurrentPosition().then(position => {
 
-        return [
-          new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-          new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-          new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-          new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-          new google.maps.LatLng(position.coords.latitude + 0.01, position.coords.longitude + 0.01),
-          new google.maps.LatLng(position.coords.latitude + 0.011, position.coords.longitude + 0.01),
-          new google.maps.LatLng(position.coords.latitude + 0.012, position.coords.longitude + 0.01),
-          new google.maps.LatLng(position.coords.latitude + 0.013, position.coords.longitude + 0.01),
-          new google.maps.LatLng(position.coords.latitude + 0.02, position.coords.longitude + 0.02),
-          new google.maps.LatLng(position.coords.latitude + 0.03, position.coords.longitude + 0.03),
-          new google.maps.LatLng(position.coords.latitude + 0.04, position.coords.longitude + 0.04),
-        ];
-      });
-    }
+      return [
+        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+        new google.maps.LatLng(position.coords.latitude + 0.01, position.coords.longitude + 0.01),
+        new google.maps.LatLng(position.coords.latitude + 0.011, position.coords.longitude + 0.01),
+        new google.maps.LatLng(position.coords.latitude + 0.012, position.coords.longitude + 0.01),
+        new google.maps.LatLng(position.coords.latitude + 0.013, position.coords.longitude + 0.01),
+        new google.maps.LatLng(position.coords.latitude + 0.02, position.coords.longitude + 0.02),
+        new google.maps.LatLng(position.coords.latitude + 0.03, position.coords.longitude + 0.03),
+        new google.maps.LatLng(position.coords.latitude + 0.04, position.coords.longitude + 0.04),
+      ];
+    });
+  }
+
   ngOnDestroy() {
     this.watchPositionSubscription.unsubscribe();
   }
-  }
+}
   
 
 
