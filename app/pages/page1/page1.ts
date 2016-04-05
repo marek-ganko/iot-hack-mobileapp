@@ -14,6 +14,7 @@ export class Page1 {
       this.loadHeatmapLayer(map);
       this.setListeners(map);
       this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
+        console.log('user position changed', position.coords.latitude, position.coords.longitude);
         map.setCenter(this.getLatLng(position));
       });
     });
@@ -21,12 +22,16 @@ export class Page1 {
   }
 
   private setListeners(map) {
-    map.addListener('zoom_changed', (zoom) => {
+    map.addListener('zoom_changed', () => {
       if (!this.heatmapLayer) {
         return;
       }
 
       this.heatmapLayer.set('radius', map.getZoom());
+    });
+
+    map.addListener('bounds_changed', () => {
+      console.log('bounds_changed', map.getBounds());
     });
   }
 
