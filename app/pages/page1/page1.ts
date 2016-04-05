@@ -1,30 +1,36 @@
 import {Page} from 'ionic-angular';
-import {ElementRef} from 'angular2/core';
 import {Geolocation} from "ionic-native/dist/index";
 
 @Page({
   templateUrl: 'build/pages/page1/page1.html',
 })
 export class Page1 {
-  private elementRef:ElementRef;
-
-  constructor(elementRef:ElementRef) {
-    this.elementRef = elementRef;
-
+  private heatmapLayer:any;
+  
+  constructor() {
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
+      this.setListeners(map);
     });
 
   }
 
+  private setListeners(map) {
+    map.addListener('zoom_changed', (zoom) => {
+      if (!this.heatmapLayer) {
+        return;
+      }
+
+      this.heatmapLayer.set('radius', map.getZoom());
+    });
+  }
 
   private loadHeatmapLayer(map) {
     this.getPoints().then(points => {
-      console.log('a')
-      new google.maps.visualization.HeatmapLayer({
+      this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
         data: points,
-        map: map,
+        map,
         options: {
           radius: 20
         }
@@ -38,7 +44,7 @@ export class Page1 {
   }
 
   private getCurrentPosition():Promise<any> {
-    return Geolocation.getCurrentPosition({timeout: 10000, enableHighAccuracy: true}).then(position=>position, ()=> {
+    return Geolocation.getCurrentPosition({timeout: 1000, enableHighAccuracy: true}).then(position=>position, ()=> {
       console.error('getCurrentPosition error');
       return {
         timestamp: new Date().getTime(),
@@ -58,7 +64,6 @@ export class Page1 {
   private loadMap():Promise<any> {
     return new Promise((resolve => {
       this.getCurrentPosition().then(position => {
-        console.log(position)
         const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         const mapOptions = {
           center: latLng,
