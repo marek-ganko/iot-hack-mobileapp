@@ -1,14 +1,17 @@
-import {Page} from 'ionic-angular';
+import {Platform, Page, ActionSheet, NavController} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
 
 @Page({
   templateUrl: 'build/pages/page1/page1.html',
 })
-export class Page1 {
+export class PageMap {
   private heatmapLayer:any;
   private watchPositionSubscription:any;
+  private actionSheet:any;
+  private dataType:string = 'dust';
 
-  constructor() {
+  constructor(public nav: NavController) {
+
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
@@ -19,6 +22,48 @@ export class Page1 {
       });
     });
 
+  }
+
+  openMenu() {
+    this.actionSheet = ActionSheet.create({
+      //title: 'Actions',
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            console.log('Delete clicked');
+          }
+        },
+        {
+          text: 'Share',
+          handler: () => {
+            console.log('Share clicked');
+          }
+        },
+        {
+          text: 'Play',
+          handler: () => {
+            console.log('Play clicked');
+          }
+        },
+        {
+          text: 'Favorite',
+          handler: () => {
+            console.log('Favorite clicked');
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel', // will always sort to be on the bottom
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+
+    this.nav.present(this.actionSheet);
   }
 
   private setListeners(map) {
@@ -42,7 +87,7 @@ export class Page1 {
         map,
         options: {
           radius: 20
-        }
+        },
       });
     });
   };
@@ -76,7 +121,8 @@ export class Page1 {
         const mapOptions = {
           center: this.getLatLng(position),
           zoom: 15,
-          mapTypeId: google.maps.MapTypeId.HYBRID
+          mapTypeId: google.maps.MapTypeId.HYBRID,
+          disableDefaultUI: true
         };
 
         return resolve(new google.maps.Map(document.getElementById('map'), mapOptions));

@@ -1,0 +1,11 @@
+<ion-list>
+    <ion-item *ngFor="#point of points; #i = index">
+        <ion-thumbnail item-left>
+            <!--<img src="img/thumbnail-totoro.png">-->
+            <ion-icon name="cloudy-outline" item-left></ion-icon>
+        </ion-thumbnail>
+        <h2>{{ point.name }}</h2>
+        <p>{{ point.address }}</p>
+        <button clear item-right>View</button>
+    </ion-item>
+</ion-list>
