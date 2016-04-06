@@ -80,7 +80,9 @@ export class PageMap {
   }
 
   onSegmentChanged(event) {
-    console.log('changed', event.value);
+    if (event.value === 'bicycle') {
+      this.toggleBicycleLayer();
+    }
     this.selectHeatMapGradient(this.heatmapLayer, event.value);    
   }
 
@@ -148,15 +150,12 @@ export class PageMap {
   }
 
   private loadHeatmapLayer(map) {
-    this.getPoints().then(points => {
-      this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
-        data: points,
-        map,
-        gradient: PageMap.HUMIDITY_GRADIENT,
-        options: {
-          radius: 20
-        }
-      });
+    this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
+      map,
+      gradient: PageMap.HUMIDITY_GRADIENT,
+      options: {
+        radius: 50
+      }
     });
   };
 
@@ -212,25 +211,8 @@ export class PageMap {
         console.log(point.position.lat, point.position.lng);
       }
       return point.position && point.position.lat && point.position.lng ?
-      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: data[this.dataType] || 1 } : null;
+      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: point[this.dataType] || 1 } : null;
     }).filter(point=>point);
-  }
-
-  private getPoints() {
-    return this.getCurrentPosition().then(position => {
-
-      return [
-        { location: new google.maps.LatLng(position.coords.latitude, position.coords.longitude), weight: 1},
-        { location: new google.maps.LatLng(position.coords.latitude, position.coords.longitude), weight: 1},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.01, position.coords.longitude + 0.01), weight: 0.5},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.011, position.coords.longitude + 0.01), weight: 0.5},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.012, position.coords.longitude + 0.01), weight: 1},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.013, position.coords.longitude + 0.01), weight: 1},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.02, position.coords.longitude + 0.02), weight: 2},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.03, position.coords.longitude + 0.03), weight: 10},
-        { location: new google.maps.LatLng(position.coords.latitude + 0.04, position.coords.longitude + 0.04), weight: 1},
-      ];
-    });
   }
 
   ngOnDestroy() {
@@ -240,7 +222,7 @@ export class PageMap {
   
   private selectHeatMapGradient(heatMap: any, dataType: string) {
     switch (dataType) {
-      case "dust":
+      case "pm2_5":
         heatMap.set('gradient', PageMap.DUST_GRADIENT);
         break;
       case "humidity":
@@ -248,9 +230,6 @@ export class PageMap {
         break;
       case "temperature":
         heatMap.set('gradient', PageMap.TEMPERATURE_GRADIENT);
-        break;
-      case "bicycle":
-        this.toggleBicycleLayer();
         break;
     }
   }
