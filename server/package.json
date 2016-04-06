@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "deploy": "chmod +x deploy.sh && ./deploy.sh",
+    "dev": "meteor"
+  },
+  "author": "google",
+  "license": "ISC"
+}

@@ -1,14 +1,27 @@
 import {Page} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
+import {Http} from "angular2/http";
+import {Observable} from 'rxjs/Rx';
+
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergemap';
+import 'rxjs/add/observable/interval';
 
 @Page({
-  templateUrl: 'build/pages/page1/page1.html',
+  templateUrl: 'build/pages/page1/page1.html'
 })
 export class Page1 {
   private heatmapLayer:any;
   private watchPositionSubscription:any;
 
-  constructor() {
+  constructor(private http: Http) {
+
+    this.initializePolling().subscribe(
+      data => console.log(data),
+      err => console.error(err),
+      () => console.log('Random Quote Complete')
+    );
+
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
@@ -19,6 +32,17 @@ export class Page1 {
       });
     });
 
+  }
+
+  private initializePolling():Observable<any> {
+    return Observable
+      .interval(10000)
+      .flatMap(() => this.getMeasurments().retry(3));
+  }
+
+  private getMeasurments():Observable<any> {
+    return this.http.get('http://nokianeteng.pl:3000/api/v1/measurments')
+      .map(res => res.json());
   }
 
   private setListeners(map) {
