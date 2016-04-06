@@ -232,9 +232,10 @@ export class PageMap {
         heatMap.set('gradient', PageMap.HUMIDITY_GRADIENT);
         break;
       case "temperature":
-        heatMap.set('gradient', null);
+        heatMap.set('gradient', PageMap.TEMPERATURE_GRADIENT);
         break;
       case "bicycle":
+        this.toggleBicycleLayer();
         break;
     }
   }
