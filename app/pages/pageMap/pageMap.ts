@@ -1,6 +1,6 @@
 import {Platform, Page, ActionSheet, NavController,MenuController} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
-import {Http} from "angular2/http";
+import {Http, Headers} from "angular2/http";
 import {Observable} from 'rxjs/Rx';
 import Bluetooth from "../../modules/Bluetooth";
 
@@ -35,15 +35,27 @@ export class PageMap {
         console.error(err);
       }
     );*/
+  /*  const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    http.post('http://192.168.43.221:1880/location', JSON.stringify({lat: 51.126603100000004, lng: 16.9779427}), {headers}).subscribe(a=>{
+      console.log(a);
+    },
+    e => {
+      console.log(e);
+    });*/
 
     this.initializePolling().subscribe(
       data => {
-        data = data.data ? this.formatData(data.data) : null;
+        data = data ? this.formatData(data) : null;
         console.log(data);
-        this.heatmapLayer.setData(data ? data : null);
-        this.selectHeatMapGradient(this.heatmapLayer, this.dataType);
+        if (data) {
+          this.heatmapLayer.setData(!!data ? data : null);
+          this.selectHeatMapGradient(this.heatmapLayer, this.dataType);
+        }
       },
-      err => console.error(err)
+      err => {
+        console.error(err)
+      }
     );
 
     this.loadMap().then(map => {
@@ -52,7 +64,14 @@ export class PageMap {
       this.loadHeatmapLayer(map);
       this.setListeners(map);
       this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
-        http.post('http://192.168.43.221:1880/location', `{lat: ${position.coords.latitude}, lng: ${position.coords.longitude}}`).subscribe(e=>console.log(e));
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        http.post('http://192.168.43.221:1880/location', JSON.stringify({lat: position.coords.latitude, lng: position.coords.longitude}), {headers}).subscribe(a=>{
+            console.log(a);
+          },
+          e => {
+            console.log(e);
+          });
         console.log('user position changed', position.coords.latitude, position.coords.longitude);
         map.setCenter(this.getLatLng(position));
       });
@@ -126,10 +145,6 @@ export class PageMap {
 
       this.heatmapLayer.set('radius', map.getZoom());
     });
-
-    map.addListener('bounds_changed', () => {
-      console.log('bounds_changed', map.getBounds());
-    });
   }
 
   private loadHeatmapLayer(map) {
@@ -197,7 +212,7 @@ export class PageMap {
         console.log(point.position.lat, point.position.lng);
       }
       return point.position && point.position.lat && point.position.lng ?
-      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: data[this.dataType]} : null;
+      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: data[this.dataType] || 1 } : null;
     }).filter(point=>point);
   }
 
