@@ -4,7 +4,7 @@ import {Http} from "angular2/http";
 import {Observable} from 'rxjs/Rx';
 
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergemap';
+//import 'rxjs/add/operator/mergemap';
 import 'rxjs/add/observable/interval';
 
 @Page({

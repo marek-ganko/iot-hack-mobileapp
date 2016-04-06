@@ -21,7 +21,7 @@ import {PageList} from './pages/pageList/pageList';
     </ion-menu>
 
     <ion-nav id="nav" #content [root]="rootPage"></ion-nav>`,
-  config: {} // http://ionicframework.com/docs/v2/api/config/Config/,
+  config: {}, // http://ionicframework.com/docs/v2/api/config/Config/,
   providers:[HTTP_PROVIDERS]
 })
 export class MyApp {
