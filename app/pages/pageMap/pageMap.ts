@@ -20,9 +20,12 @@ export class PageMap {
     this.menu = menu;
 
     this.initializePolling().subscribe(
-      data => console.log(data),
-      err => console.error(err),
-      () => console.log('Random Quote Complete')
+      data => {
+        data = data.data ? this.formatDataCoords(data.data) : null;
+        console.log(data);
+        this.heatmapLayer.setData(data ? data : null);
+      },
+      err => console.error(err)
     );
 
     this.loadMap().then(map => {
@@ -40,7 +43,7 @@ export class PageMap {
 
   private initializePolling():Observable<any> {
     return Observable
-      .interval(10000)
+      .interval(5000)
       .flatMap(() => this.getMeasurments().retry(3));
   }
 
@@ -124,7 +127,6 @@ export class PageMap {
 
   private getCurrentPosition():Promise<any> {
     return Geolocation.getCurrentPosition({timeout: 1000, enableHighAccuracy: true}).then(position=>position, ()=> {
-      console.error('getCurrentPosition error');
       return {
         timestamp: new Date().getTime(),
         coords: {
@@ -157,6 +159,15 @@ export class PageMap {
 
   private getLatLng(position):any {
     return new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  }
+
+  private formatDataCoords(data: any[]) {
+    return data.map(point => {
+      if (point.position && point.position.lat && point.position.lng) {
+        console.log(point.position.lat, point.position.lng);
+      }
+      return point.position && point.position.lat && point.position.lng ? new google.maps.LatLng(point.position.lat, point.position.lng) : null;
+    }).filter(point=>point);
   }
 
   private getPoints() {
