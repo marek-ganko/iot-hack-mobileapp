@@ -55,7 +55,7 @@ if (Meteor.isServer) {
         action: function () {
           var body = _.extend({}, this.request.body);
           var position = body.position;
-          body.geohash = Geohash.encode(position.lat, position.lon);
+          body.geohash = Geohash.encode(position.lat, position.lng);
 
           var _id = Measurments.insert(body);
           var data = _.extend({_id: _id}, body);
