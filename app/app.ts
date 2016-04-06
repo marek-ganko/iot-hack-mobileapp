@@ -15,6 +15,7 @@ import {PageCharts} from './pages/pageCharts/pageCharts';
 
       <ion-content>
         <ion-list>
+
           <button (click)="openPage(pageMap)" ion-item>Map</button>
           <button (click)="openPage(pageList)" ion-item>Points</button>
           <button (click)="openPage(pageCharts)" ion-item>Charts</button>
