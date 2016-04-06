@@ -20,6 +20,7 @@ export class PageMap {
   public bluetoothMsg:string = '';
   private bikeLayer:any;
   private map:any;
+  private interval:any;
 
   constructor(private http: Http, public nav: NavController, menu: MenuController) {
     this.menu = menu;
@@ -46,10 +47,10 @@ export class PageMap {
 
     this.initializePolling().subscribe(
       data => {
-        data = data ? this.formatData(data) : null;
+        data = !!data ? this.formatData(data) : null;
         console.log(data);
         if (data) {
-          this.heatmapLayer.setData(!!data ? data : null);
+          this.heatmapLayer.setData(data);
           this.selectHeatMapGradient(this.heatmapLayer, this.dataType);
         }
       },
@@ -63,7 +64,22 @@ export class PageMap {
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
       this.setListeners(map);
-      this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
+
+      this.interval = window.setInterval(() => {
+        Geolocation.getCurrentPosition().then(position => {
+          const headers = new Headers();
+          headers.append('Content-Type', 'application/json');
+          http.post('http://192.168.43.221:1880/location', JSON.stringify({lat: position.coords.latitude, lng: position.coords.longitude}), {headers}).subscribe(a=>{
+              console.log(a);
+            },
+            e => {
+              console.log(e);
+            });
+          console.log('user position changed', position.coords.latitude, position.coords.longitude);
+          map.setCenter(this.getLatLng(position));
+        });
+      }, 3000);
+      /*this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
         http.post('http://192.168.43.221:1880/location', JSON.stringify({lat: position.coords.latitude, lng: position.coords.longitude}), {headers}).subscribe(a=>{
@@ -74,7 +90,7 @@ export class PageMap {
           });
         console.log('user position changed', position.coords.latitude, position.coords.longitude);
         map.setCenter(this.getLatLng(position));
-      });
+      });*/
     });
 
   }
@@ -207,6 +223,12 @@ export class PageMap {
   }
 
   private formatData(data: any[]) {
+    const getWeight = (field) => {
+      switch (field) {
+        case '':
+      }
+    };
+
     return data.map(point => {
       if (point.position && point.position.lat && point.position.lng) {
         console.log(point.position.lat, point.position.lng);
@@ -235,9 +257,9 @@ export class PageMap {
 
   ngOnDestroy() {
     this.watchPositionSubscription.unsubscribe();
+    window.clearInterval(this.interval);
   }
-  
-  
+
   private selectHeatMapGradient(heatMap: any, dataType: string) {
     switch (dataType) {
       case "dust":
