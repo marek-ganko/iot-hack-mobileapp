@@ -1,25 +1,31 @@
-import {Page} from 'ionic-angular';
+import {Platform, Page, ActionSheet, NavController,MenuController} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
 import {Http} from "angular2/http";
 import {Observable} from 'rxjs/Rx';
 
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergemap';
+//import 'rxjs/add/operator/mergemap';
 import 'rxjs/add/observable/interval';
 
 @Page({
-  templateUrl: 'build/pages/page1/page1.html'
+  templateUrl: 'build/pages/pageMap/pageMap.html',
 })
-export class Page1 {
+export class PageMap {
   private heatmapLayer:any;
   private watchPositionSubscription:any;
+  private actionSheet:any;
+  private dataType:string = 'dust';
 
-  constructor(private http: Http) {
+  constructor(private http: Http, public nav: NavController, menu: MenuController) {
+    this.menu = menu;
 
     this.initializePolling().subscribe(
-      data => console.log(data),
-      err => console.error(err),
-      () => console.log('Random Quote Complete')
+      data => {
+        data = data.data ? this.formatDataCoords(data.data) : null;
+        console.log(data);
+        this.heatmapLayer.setData(data ? data : null);
+      },
+      err => console.error(err)
     );
 
     this.loadMap().then(map => {
@@ -34,15 +40,58 @@ export class Page1 {
 
   }
 
+
   private initializePolling():Observable<any> {
     return Observable
-      .interval(10000)
+      .interval(5000)
       .flatMap(() => this.getMeasurments().retry(3));
   }
 
   private getMeasurments():Observable<any> {
     return this.http.get('http://nokianeteng.pl:3000/api/v1/measurments')
       .map(res => res.json());
+  }
+
+  openSecondMenu() {
+    this.actionSheet = ActionSheet.create({
+      //title: 'Actions',
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            console.log('Delete clicked');
+          }
+        },
+        {
+          text: 'Share',
+          handler: () => {
+            console.log('Share clicked');
+          }
+        },
+        {
+          text: 'Play',
+          handler: () => {
+            console.log('Play clicked');
+          }
+        },
+        {
+          text: 'Favorite',
+          handler: () => {
+            console.log('Favorite clicked');
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel', // will always sort to be on the bottom
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+
+    this.nav.present(this.actionSheet);
   }
 
   private setListeners(map) {
@@ -78,7 +127,6 @@ export class Page1 {
 
   private getCurrentPosition():Promise<any> {
     return Geolocation.getCurrentPosition({timeout: 1000, enableHighAccuracy: true}).then(position=>position, ()=> {
-      console.error('getCurrentPosition error');
       return {
         timestamp: new Date().getTime(),
         coords: {
@@ -100,7 +148,8 @@ export class Page1 {
         const mapOptions = {
           center: this.getLatLng(position),
           zoom: 15,
-          mapTypeId: google.maps.MapTypeId.HYBRID
+          mapTypeId: google.maps.MapTypeId.HYBRID,
+          disableDefaultUI: true
         };
 
         return resolve(new google.maps.Map(document.getElementById('map'), mapOptions));
@@ -110,6 +159,15 @@ export class Page1 {
 
   private getLatLng(position):any {
     return new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  }
+
+  private formatDataCoords(data: any[]) {
+    return data.map(point => {
+      if (point.position && point.position.lat && point.position.lng) {
+        console.log(point.position.lat, point.position.lng);
+      }
+      return point.position && point.position.lat && point.position.lng ? new google.maps.LatLng(point.position.lat, point.position.lng) : null;
+    }).filter(point=>point);
   }
 
   private getPoints() {

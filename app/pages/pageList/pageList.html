@@ -1,0 +1,20 @@
+<ion-navbar *navbar>
+    <ion-buttons start>
+        <button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+    </ion-buttons>
+    <ion-title>EcoSense &#174;</ion-title>
+</ion-navbar>
+
+<ion-list>
+    <ion-item *ngFor="#point of points; #i = index">
+        <ion-thumbnail item-left>
+            <!--<img src="img/thumbnail-totoro.png">-->
+            <ion-icon name="cloudy-outline" item-left></ion-icon>
+        </ion-thumbnail>
+        <h2>{{ point.name }}</h2>
+        <p>{{ point.address }}</p>
+        <button clear item-right>View</button>
+    </ion-item>
+</ion-list>
