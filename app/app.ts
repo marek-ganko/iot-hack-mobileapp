@@ -15,7 +15,7 @@ import {PageList} from './pages/pageList/pageList';
       <ion-content>
         <ion-list>
           <button (click)="openPage(pageMap)" ion-item>Map</button>
-          <button (click)="openPage(pageList)" ion-item>Leader Board</button>
+          <button (click)="openPage(pageList)" ion-item>Points</button>
         </ion-list>
       </ion-content>
     </ion-menu>

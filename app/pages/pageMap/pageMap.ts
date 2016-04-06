@@ -1,8 +1,8 @@
-import {Platform, Page, ActionSheet, NavController} from 'ionic-angular';
+import {Platform, Page, ActionSheet, NavController,MenuController} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
 
 @Page({
-  templateUrl: 'build/pages/page1/page1.html',
+  templateUrl: 'build/pages/pageMap/pageMap.html',
 })
 export class PageMap {
   private heatmapLayer:any;
@@ -10,7 +10,8 @@ export class PageMap {
   private actionSheet:any;
   private dataType:string = 'dust';
 
-  constructor(public nav: NavController) {
+  constructor(public nav: NavController, menu: MenuController) {
+    this.menu = menu;
 
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
@@ -24,7 +25,8 @@ export class PageMap {
 
   }
 
-  openMenu() {
+
+  openSecondMenu() {
     this.actionSheet = ActionSheet.create({
       //title: 'Actions',
       buttons: [
