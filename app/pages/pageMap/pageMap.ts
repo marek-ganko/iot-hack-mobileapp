@@ -2,10 +2,12 @@ import {Platform, Page, ActionSheet, NavController,MenuController} from 'ionic-a
 import {Geolocation} from "ionic-native/dist/index";
 import {Http} from "angular2/http";
 import {Observable} from 'rxjs/Rx';
+import Bluetooth from "../../modules/Bluetooth";
 
 import 'rxjs/add/operator/map';
 //import 'rxjs/add/operator/mergemap';
 import 'rxjs/add/observable/interval';
+
 
 @Page({
   templateUrl: 'build/pages/pageMap/pageMap.html',
@@ -15,9 +17,24 @@ export class PageMap {
   private watchPositionSubscription:any;
   private actionSheet:any;
   private dataType:string = 'dust';
+  public bluetoothMsg:string = '';
+  private bikeLayer:any;
+  private map:any;
 
   constructor(private http: Http, public nav: NavController, menu: MenuController) {
     this.menu = menu;
+/*
+    const bluetooth = new Bluetooth();
+    bluetooth.startScan().subscribe(
+      data => {
+        console.log(data);
+        this.bluetoothMsg = JSON.stringify(data);
+      },
+      err => {
+        this.bluetoothMsg = JSON.stringify(err);
+        console.error(err);
+      }
+    );*/
 
     this.initializePolling().subscribe(
       data => {
@@ -30,10 +47,12 @@ export class PageMap {
     );
 
     this.loadMap().then(map => {
+      this.map = map;
       this.loadBicycleLayer(map);
       this.loadHeatmapLayer(map);
       this.setListeners(map);
       this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
+        http.post('http://192.168.43.221:1880/location', `{lat: ${position.coords.latitude}, lng: ${position.coords.longitude}}`).subscribe(e=>console.log(e));
         console.log('user position changed', position.coords.latitude, position.coords.longitude);
         map.setCenter(this.getLatLng(position));
       });
@@ -43,6 +62,9 @@ export class PageMap {
 
   onSegmentChanged(event) {
     console.log('changed', event.value);
+    if (event.value === 'bicycle') {
+      this.toggleBicycleLayer();
+    }
   }
 
   private initializePolling():Observable<any> {
@@ -125,8 +147,13 @@ export class PageMap {
   };
 
   private loadBicycleLayer(map) {
-    var bikeLayer = new google.maps.BicyclingLayer();
-    bikeLayer.setMap(map);
+    this.bikeLayer = new google.maps.BicyclingLayer();
+    this.bikeLayer.setMap(map);
+  }
+
+  private toggleBicycleLayer() {
+    const bikeMap = this.bikeLayer.getMap();
+    this.bikeLayer.setMap(bikeMap ? null : this.map);
   }
 
   private getCurrentPosition():Promise<any> {
