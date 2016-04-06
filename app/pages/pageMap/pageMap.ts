@@ -1,5 +1,11 @@
 import {Platform, Page, ActionSheet, NavController,MenuController} from 'ionic-angular';
 import {Geolocation} from "ionic-native/dist/index";
+import {Http} from "angular2/http";
+import {Observable} from 'rxjs/Rx';
+
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergemap';
+import 'rxjs/add/observable/interval';
 
 @Page({
   templateUrl: 'build/pages/pageMap/pageMap.html',
@@ -10,8 +16,14 @@ export class PageMap {
   private actionSheet:any;
   private dataType:string = 'dust';
 
-  constructor(public nav: NavController, menu: MenuController) {
+  constructor(private http: Http, public nav: NavController, menu: MenuController) {
     this.menu = menu;
+
+    this.initializePolling().subscribe(
+      data => console.log(data),
+      err => console.error(err),
+      () => console.log('Random Quote Complete')
+    );
 
     this.loadMap().then(map => {
       this.loadBicycleLayer(map);
@@ -25,6 +37,17 @@ export class PageMap {
 
   }
 
+
+  private initializePolling():Observable<any> {
+    return Observable
+      .interval(10000)
+      .flatMap(() => this.getMeasurments().retry(3));
+  }
+
+  private getMeasurments():Observable<any> {
+    return this.http.get('http://nokianeteng.pl:3000/api/v1/measurments')
+      .map(res => res.json());
+  }
 
   openSecondMenu() {
     this.actionSheet = ActionSheet.create({
@@ -89,7 +112,7 @@ export class PageMap {
         map,
         options: {
           radius: 20
-        },
+        }
       });
     });
   };
