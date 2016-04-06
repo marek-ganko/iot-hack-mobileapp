@@ -16,11 +16,12 @@ export class PageMap {
   private heatmapLayer:any;
   private watchPositionSubscription:any;
   private actionSheet:any;
-  private dataType:string = 'dust';
+  private dataType:string = 'pm2_5';
   public bluetoothMsg:string = '';
   private bikeLayer:any;
   private map:any;
   private interval:any;
+  private marker:any;
 
   constructor(private http: Http, public nav: NavController, menu: MenuController) {
     this.menu = menu;
@@ -47,6 +48,7 @@ export class PageMap {
 
     this.initializePolling().subscribe(
       data => {
+        console.log(data);
         data = !!data ? this.formatData(data) : null;
         console.log(data);
         if (data) {
@@ -76,7 +78,8 @@ export class PageMap {
               console.log(e);
             });
           console.log('user position changed', position.coords.latitude, position.coords.longitude);
-          map.setCenter(this.getLatLng(position));
+          //map.setCenter(this.getLatLng(position));
+          this.marker.setPosition(this.getLatLng(position));
         });
       }, 3000);
       /*this.watchPositionSubscription = Geolocation.watchPosition().subscribe(position => {
@@ -93,6 +96,10 @@ export class PageMap {
       });*/
     });
 
+  }
+
+  private loadMarker(map, LatLng) {
+    this.marker = new google.maps.Marker( {position: LatLng, map: map} );
   }
 
   onSegmentChanged(event) {
@@ -161,7 +168,7 @@ export class PageMap {
         return;
       }
 
-      this.heatmapLayer.set('radius', map.getZoom());
+      this.heatmapLayer.set('radius', map.getZoom() * 5);
     });
   }
 
@@ -170,6 +177,7 @@ export class PageMap {
       map,
       gradient: PageMap.HUMIDITY_GRADIENT,
       options: {
+        opacity: 1,
         radius: 50
       }
     });
@@ -212,7 +220,9 @@ export class PageMap {
           disableDefaultUI: true
         };
 
-        return resolve(new google.maps.Map(document.getElementById('map'), mapOptions));
+        const map = new google.maps.Map(document.getElementById('map'), mapOptions);
+        this.loadMarker(map);
+        return resolve(map);
       });
     }));
   }
@@ -222,23 +232,17 @@ export class PageMap {
   }
 
   private formatData(data: any[]) {
-    const getWeight = (field) => {
-      switch (field) {
-        case '':
-      }
-    };
-
     return data.map(point => {
-      if (point.position && point.position.lat && point.position.lng) {
-        console.log(point.position.lat, point.position.lng);
-      }
+      console.log(point[this.dataType]);
       return point.position && point.position.lat && point.position.lng ?
-      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: point[this.dataType] || 1 } : null;
+      {
+        location: new google.maps.LatLng(point.position.lat, point.position.lng), weight: point[this.dataType] || 1
+      } : null;
     }).filter(point=>point);
   }
 
   ngOnDestroy() {
-    this.watchPositionSubscription.unsubscribe();
+    //this.watchPositionSubscription.unsubscribe();
     window.clearInterval(this.interval);
   }
 
@@ -281,7 +285,7 @@ export class PageMap {
   
   private static get DUST_GRADIENT() {
     return [
-      'rgba(255, 255, 255, 0.1)',
+      'rgba(255, 255, 255, 0)',
       'rgba(160,82,45, 0.6)',
       'rgba(160,82,45, 0.8)',
       'rgba(160,82,45, 1)',
