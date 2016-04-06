@@ -40,6 +40,9 @@ export class PageMap {
 
   }
 
+  onSegmentChanged(event) {
+    console.log('changed', event.value);
+  }
 
   private initializePolling():Observable<any> {
     return Observable

@@ -18,7 +18,7 @@
       <!--<ion-icon name="create"></ion-icon>-->
     <!--</button>-->
   </ion-buttons>
-  <ion-segment [(ngModel)]="dataType">
+  <ion-segment [(ngModel)]="dataType" (change)="onSegmentChanged($event)">
     <ion-segment-button value="dust">
       <ion-icon name="nuclear"></ion-icon>
     </ion-segment-button>
