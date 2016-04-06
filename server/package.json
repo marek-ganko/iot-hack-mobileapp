@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "deploy": "meteor build bundle.tar.gz && scp bundle.tar.gz iot-hackaton@185.5.97.71:/home/iot-hackaton/bundle.tar.gz && ssh iot-hackaton@185.5.97.71 'tar xf bundle.tar.gz && cd bundle/programs/server && npm install && export MONGO_URL='mongodb://healthy-way:healthy-way@localhost:27018/healthy-way' && export ROOT_URL='http://localhost' && export PORT=3000 && forever stopall && forever start ../../main.js' && rm bundle.tar.gz ",
+    "dev": "meteor"
+  },
+  "author": "google",
+  "license": "ISC"
+}
