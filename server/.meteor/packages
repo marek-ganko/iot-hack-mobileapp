@@ -24,3 +24,5 @@ meteorhacks:npm
 
 
 npm-container
+meteorhacks:aggregate
+erasaur:meteor-lodash

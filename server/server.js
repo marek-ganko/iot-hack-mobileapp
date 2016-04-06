@@ -1,7 +1,33 @@
 Measurments = new Meteor.Collection("measurments");
 var Geohash = Meteor.npmRequire('latlon-geohash');
 
-if(Meteor.isServer) {
+var pipeline = [{
+  '$group': {
+    '_id': {
+      '$substr': ["$geohash", 0, 5]
+    },
+    "timestamp": {
+      "$max": "$timestamp"
+    },
+    "temperature": {
+      "$avg": "$temperature"
+    },
+    "humidity": {
+      "$avg": "$humidity"
+    },
+    "pm1": {
+      "$avg": "$pm1"
+    },
+    "pm2_5": {
+      "$avg": "$pm2_5"
+    },
+    "pm10": {
+      "$avg": "$pm10"
+    }
+  }
+}];
+
+if (Meteor.isServer) {
   Meteor.startup(function () {
 
     Api = new Restivus({
@@ -13,9 +39,10 @@ if(Meteor.isServer) {
 
       get: {
         action: function () {
-          var measurments = Measurments.find({}).fetch();
-          if (measurments) {
-            return {status: "success", data: measurments};
+          var result = Measurments.aggregate(pipeline);
+
+          if (result) {
+            return {status: "success", data: result};
           }
           return {
             statusCode: 400,
@@ -26,13 +53,14 @@ if(Meteor.isServer) {
 
       post: {
         action: function () {
-          var body = this.request.body;
+          var body = _.extend({}, this.request.body);
           var position = body.position;
           body.geohash = Geohash.encode(position.lat, position.lon);
-          var article = Measurments.insert(body);
 
-          if (article) {
-            return {status: "success", data: article};
+          var _id = Measurments.insert(body);
+          var data = _.extend({_id: _id}, body);
+          if (_id) {
+            return {status: "success", data: data};
           }
 
           return {
