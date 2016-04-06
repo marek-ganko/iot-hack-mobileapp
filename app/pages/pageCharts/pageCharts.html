@@ -1,0 +1,27 @@
+<ion-navbar *navbar>
+    <ion-buttons start>
+        <button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+    </ion-buttons>
+    <ion-title>EcoSense &#174;</ion-title>
+</ion-navbar>
+
+<ion-toolbar>
+    <ion-segment [(ngModel)]="chartModelType" (change)="onChartModelChanged($event)">
+        <ion-segment-button value="dust">
+            <ion-icon name="nuclear"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button value="temperature">
+            <ion-icon name="thermometer"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button value="humidity">
+            <ion-icon name="rainy"></ion-icon>
+        </ion-segment-button>
+    </ion-segment>
+</ion-toolbar>
+
+
+<ion-content padding>
+    <div id="chart"></div>
+</ion-content>

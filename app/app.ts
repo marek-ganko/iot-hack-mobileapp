@@ -4,6 +4,7 @@ import {StatusBar} from 'ionic-native';
 import {HTTP_PROVIDERS} from "angular2/http";
 import {PageMap} from './pages/pageMap/pageMap';
 import {PageList} from './pages/pageList/pageList';
+import {PageCharts} from './pages/pageCharts/pageCharts';
 
 @App({
   template: `
@@ -16,6 +17,7 @@ import {PageList} from './pages/pageList/pageList';
         <ion-list>
           <button (click)="openPage(pageMap)" ion-item>Map</button>
           <button (click)="openPage(pageList)" ion-item>Points</button>
+          <button (click)="openPage(pageCharts)" ion-item>Charts</button>
         </ion-list>
       </ion-content>
     </ion-menu>
@@ -32,6 +34,7 @@ export class MyApp {
     this.menu = menu;
     this.pageMap = PageMap;
     this.pageList = PageList;
+    this.pageCharts = PageCharts;
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
