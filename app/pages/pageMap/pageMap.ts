@@ -38,10 +38,10 @@ export class PageMap {
 
     this.initializePolling().subscribe(
       data => {
-        data = data.data ? this.formatDataCoords(data.data) : null;
+        data = data.data ? this.formatData(data.data) : null;
         console.log(data);
         this.heatmapLayer.setData(data ? data : null);
-        this.heatmapLayer.set('gradient', this.heatmapLayer.get('gradient') ? null :  PageMap.HUMIDITY_GRADIENT);
+        this.selectHeatMapGradient(this.heatmapLayer, this.dataType);
       },
       err => console.error(err)
     );
@@ -62,9 +62,7 @@ export class PageMap {
 
   onSegmentChanged(event) {
     console.log('changed', event.value);
-    if (event.value === 'bicycle') {
-      this.toggleBicycleLayer();
-    }
+    this.selectHeatMapGradient(this.heatmapLayer, event.value);    
   }
 
   private initializePolling():Observable<any> {
@@ -74,7 +72,7 @@ export class PageMap {
   }
 
   private getMeasurments():Observable<any> {
-    return this.http.get('http://nokianeteng.pl:3000/api/v1/measurments')
+    return this.http.get('http://nokianeteng.pl:9000/api/measurments')
       .map(res => res.json());
   }
 
@@ -139,6 +137,7 @@ export class PageMap {
       this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
         data: points,
         map,
+        gradient: PageMap.HUMIDITY_GRADIENT,
         options: {
           radius: 20
         }
@@ -192,12 +191,13 @@ export class PageMap {
     return new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
   }
 
-  private formatDataCoords(data: any[]) {
+  private formatData(data: any[]) {
     return data.map(point => {
       if (point.position && point.position.lat && point.position.lng) {
         console.log(point.position.lat, point.position.lng);
       }
-      return point.position && point.position.lat && point.position.lng ? new google.maps.LatLng(point.position.lat, point.position.lng) : null;
+      return point.position && point.position.lat && point.position.lng ?
+      { location: new google.maps.LatLng(point.position.coords.latitude, point.position.coords.longitude), weight: data[this.dataType]} : null;
     }).filter(point=>point);
   }
 
@@ -205,17 +205,15 @@ export class PageMap {
     return this.getCurrentPosition().then(position => {
 
       return [
-        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-        new google.maps.LatLng(position.coords.latitude + 0.01, position.coords.longitude + 0.01),
-        new google.maps.LatLng(position.coords.latitude + 0.011, position.coords.longitude + 0.01),
-        new google.maps.LatLng(position.coords.latitude + 0.012, position.coords.longitude + 0.01),
-        new google.maps.LatLng(position.coords.latitude + 0.013, position.coords.longitude + 0.01),
-        new google.maps.LatLng(position.coords.latitude + 0.02, position.coords.longitude + 0.02),
-        new google.maps.LatLng(position.coords.latitude + 0.03, position.coords.longitude + 0.03),
-        new google.maps.LatLng(position.coords.latitude + 0.04, position.coords.longitude + 0.04),
+        { location: new google.maps.LatLng(position.coords.latitude, position.coords.longitude), weight: 1},
+        { location: new google.maps.LatLng(position.coords.latitude, position.coords.longitude), weight: 1},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.01, position.coords.longitude + 0.01), weight: 0.5},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.011, position.coords.longitude + 0.01), weight: 0.5},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.012, position.coords.longitude + 0.01), weight: 1},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.013, position.coords.longitude + 0.01), weight: 1},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.02, position.coords.longitude + 0.02), weight: 2},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.03, position.coords.longitude + 0.03), weight: 10},
+        { location: new google.maps.LatLng(position.coords.latitude + 0.04, position.coords.longitude + 0.04), weight: 1},
       ];
     });
   }
@@ -223,7 +221,28 @@ export class PageMap {
   ngOnDestroy() {
     this.watchPositionSubscription.unsubscribe();
   }
-
+  
+  
+  private selectHeatMapGradient(heatMap: any, dataType: string) {
+    switch (dataType) {
+      case "dust":
+        heatMap.set('gradient', PageMap.DUST_GRADIENT);
+        break;
+      case "humidity":
+        heatMap.set('gradient', PageMap.HUMIDITY_GRADIENT);
+        break;
+      case "temperature":
+        heatMap.set('gradient', null);
+        break;
+      case "bicycle":
+        break;
+    }
+  }
+  
+  private static get TEMPERATURE_GRADIENT() {
+    return null;
+  }
+  
   private static get HUMIDITY_GRADIENT() {
     return [
       'rgba(0, 255, 255, 0)',
@@ -240,6 +259,19 @@ export class PageMap {
       'rgba(127, 0, 63, 1)',
       'rgba(191, 0, 31, 1)',
       'rgba(255, 0, 0, 1)'
+    ];
+  }
+  
+  private static get DUST_GRADIENT() {
+    return [
+      'rgba(0, 0, 0, 1)',
+      'rgba(0, 0, 0, 0.8)',
+      'rgba(0, 0, 0, 0.6)',
+      'rgba(0, 0, 0, 0.4)',
+      'rgba(255, 255, 255, 0.4)',
+      'rgba(255, 255, 255, 0.6)',
+      'rgba(255, 255, 255, 0.8)',
+      'rgba(255, 255, 255, 1)'
     ];
   }
 }
